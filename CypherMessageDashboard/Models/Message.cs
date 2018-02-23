@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CypherMVC.Models
+namespace CypherMessageDashboard.Models
 {
     public class Message
     {

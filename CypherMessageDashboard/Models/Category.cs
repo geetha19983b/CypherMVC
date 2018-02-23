@@ -1,4 +1,4 @@
-﻿namespace CypherMVC.Models
+﻿namespace CypherMessageDashboard.Models
 {
     public class Category
     {

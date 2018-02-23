@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CypherMVC.Models
+namespace CypherMessageDashboard.Models
 {
     public class Admin
     {

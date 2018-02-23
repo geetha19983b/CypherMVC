@@ -1,17 +1,22 @@
-﻿using CypherMVC.Models;
+﻿using CypherMessageDashboard.Models;
+using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
+
 namespace CypherMessageDashboard.Controllers
 {
     public class TaskController : Controller
     {
+      
         public ActionResult ViewAll()
         {
-            return View();
+            var context = new FeedbackContext();
+            var tasks = context.Tasks.OrderByDescending(x => x.Created).ToList();
+            return View(tasks);
         }
 
         public ActionResult CreateEdit(int Id = 0)
@@ -22,14 +27,32 @@ namespace CypherMessageDashboard.Controllers
 
             if (Id != 0)
             {
-                return View(context.Tasks.FirstOrDefault(x => x.Id == Id));
+                var task = context.Tasks.FirstOrDefault(x => x.Id == Id);
+
+                
+                 var mappedTask = Mapper.Map<TaskVM>(task);
+                //TaskVM mappedTask = new TaskVM();
+                //mappedTask.AssignedToId = task.AssignedToId;
+                //mappedTask.AssociatedMessageId = task.AssociatedMessageId;
+                //mappedTask.CategoryId = task.CategoryId;
+                //mappedTask.Completed = task.Completed;
+                //mappedTask.Description = task.Description;
+                //mappedTask.DueDate = task.DueDate;
+                //mappedTask.Id = task.Id;
+                //mappedTask.Notes = task.Notes;
+                //mappedTask.Title = task.Title;
+                mappedTask.AssociatedMessageDisplay = task.AssociatedMessage.Subject;
+
+                return View(mappedTask);
             }
 
             return View();
         }
 
+
+
         [HttpPost]
-        public ActionResult CreateEdit(Task task)
+        public ActionResult CreateEdit(TaskVM task)
         {
             var context = new FeedbackContext();
             if (ModelState.IsValid)
@@ -40,7 +63,7 @@ namespace CypherMessageDashboard.Controllers
                     //Updating Task
                     editTask.Title = task.Title;
                     editTask.Description = task.Description;
-                    editTask.Category = task.Category;
+                    editTask.CategoryId = task.CategoryId;
                     editTask.AssignedToId = task.AssignedToId;
                     editTask.DueDate = task.DueDate;
                     editTask.AssociatedMessageId = task.AssociatedMessageId;
@@ -50,17 +73,38 @@ namespace CypherMessageDashboard.Controllers
                 }
                 else
                 {
-                    //New Task
-                    context.Tasks.Add(task);
-                    task.Created = DateTime.Now;
+                    var newTask = Mapper.Map<Task>(task);
+                    //Task mappedTask = new Task();
+                    //mappedTask.AssignedToId = task.AssignedToId;
+                    //mappedTask.AssociatedMessageId = task.AssociatedMessageId;
+                    //mappedTask.CategoryId = task.CategoryId;
+                    //mappedTask.Completed = task.Completed;
+                    //mappedTask.Description = task.Description;
+                    //mappedTask.DueDate = task.DueDate;
+                    //mappedTask.Id = task.Id;
+                    //mappedTask.Notes = task.Notes;
+                    //mappedTask.Title = task.Title;
+                    //mappedTask.Created = DateTime.Now;
+
+                    //newTask = mappedTask;
+                    newTask.Created = DateTime.Now;
+                    context.Tasks.Add(newTask);
+
+                    context.Tasks.Add(newTask);
                 }
                 context.SaveChanges();
                 return RedirectToAction("ViewAll");
             }
-
             ViewBag.Categories = context.Categories.Select(
                     x => new SelectListItem() { Text = x.Name, Value = x.Id.ToString() }).ToList();
             return View(task);
+        }
+        public ActionResult MessageSuggestions(string term)
+        {
+            var context = new FeedbackContext();
+            var messages = context.Messages.Where(x => x.Subject.Contains(term))
+                .Select(x => new { Label = x.Subject, Id = x.Id }).ToList();
+            return Json(messages, JsonRequestBehavior.AllowGet);
         }
     }
 }
