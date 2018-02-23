@@ -1,16 +1,13 @@
-﻿
-using CypherMessageDashboard.Helpers;
+﻿using CypherMessageDashboard.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
-using System.Web.Mvc;
 
-namespace CypherMVC.Models
+namespace CypherMessageDashboard.Models
 {
-    [Bind(Exclude = "AssignedTo, AssociatedMessage, Category")]
-    public class Task : IValidatableObject
+    public class TaskVM : IValidatableObject
     {
         public int Id { get; set; }
         [Required]
@@ -18,24 +15,19 @@ namespace CypherMVC.Models
         [Required]
         public string Description { get; set; }
         [Required]
-       [DueDate(ErrorMessage = "Date must be in the future")]
+        [DueDate(ErrorMessage = "Date must be in the future")]
         public DateTime? DueDate { get; set; }
         [Required]
         public int AssignedToId { get; set; }
         [Required]
         public int CategoryId { get; set; }
+        public string AssociatedMessageDisplay { get; set; }
         [Required]
         public int AssociatedMessageId { get; set; }
-        public DateTime? Created { get; set; }
         [StringLength(1000, MinimumLength = 20)]
         public string Notes { get; set; }
         [Required]
         public bool Completed { get; set; }
-
-        //Navigation Properties
-        public virtual Admin AssignedTo { get; set; }
-        public virtual Message AssociatedMessage { get; set; }
-        public virtual Category Category { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CypherMVC.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -13,18 +14,54 @@ namespace CypherMessageDashboard.Controllers
             return View();
         }
 
-        public ActionResult About()
+        public ActionResult Survey()
         {
-            ViewBag.Message = "Your application description page.";
+            var context = new FeedbackContext();
+            var admins = context.Admins.OrderByDescending(x => x.Votes.Count).ToList();
 
-            return View();
+            if (Session["HasVoted"] != null)
+            {
+                return PartialView("SurveyResults", admins);
+            }
+
+            return PartialView(admins);
         }
 
-        public ActionResult Contact()
+        [HttpPost]
+        public ActionResult Survey(int adminId)
         {
-            ViewBag.Message = "Your contact page.";
+            var context = new FeedbackContext();
+            context.Votes.Add(new Vote() { AdminId = adminId });
+            context.SaveChanges();
 
-            return View();
+            var admins = context.Admins.OrderByDescending(x => x.Votes.Count).ToList();
+
+            Session["HasVoted"] = true;
+            return PartialView("SurveyResults", admins);
+        }
+        public ActionResult Suggestion()
+        {
+            return PartialView();
+        }
+        [HttpPost]
+        public ActionResult Suggestion(string suggestion)
+        {
+            //if (!string.IsNullOrWhiteSpace(suggestion))
+            //{
+            //    //send email
+            //    TempData["Status"] = "Your message has been submitted!";
+            //}
+            //else
+            //{
+            //    TempData["Status"] = "Your message could not be submitted";
+            //}
+
+            //return RedirectToAction("Index");
+
+            //Send email, return true or false for success
+            var emailSent = true;
+
+            return PartialView("SuggestionResult", emailSent);
         }
     }
 }
